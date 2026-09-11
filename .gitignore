@@ -1,2 +1,4 @@
 diskscope
+diskscope.exe
 *.o
+*.obj

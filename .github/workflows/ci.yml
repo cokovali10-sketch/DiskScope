@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install compiler
+        run: sudo apt-get update && sudo apt-get install -y g++
+
+      - name: Build
+        run: make
+
+      - name: Test
+        run: make test
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build
+        run: make
+
+      - name: Test
+        run: make test
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build with MinGW
+        run: g++ -std=c++17 -O2 -Wall -o diskscope.exe src/main.cpp src/scope.cpp
+        shell: bash
+
+      - name: Test
+        run: ./diskscope.exe . -d 1
+        shell: bash
+
+  build-clang:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Clang
+        run: sudo apt-get update && sudo apt-get install -y clang
+
+      - name: Build with Clang
+        run: clang++ -std=c++17 -O2 -Wall -Wextra -o diskscope src/main.cpp src/scope.cpp
+
+      - name: Test
+        run: ./diskscope . -d 1
