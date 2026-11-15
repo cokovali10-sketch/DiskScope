@@ -51,13 +51,19 @@ bool should_exclude(const std::string& name, const std::set<std::string>& patter
 void scan_directory(const std::string& root, std::vector<FileEntry>& entries,
                     int max_depth, const std::set<std::string>& exclude_patterns) {
     try {
-        for (const auto& entry : fs::recursive_directory_iterator(
-                 root, fs::directory_options::skip_permission_denied)) {
-            int depth = entry.depth();
-            if (depth > max_depth) continue;
+        for (auto it = fs::recursive_directory_iterator(
+                 root, fs::directory_options::skip_permission_denied);
+             it != fs::recursive_directory_iterator(); ++it) {
+            const auto& entry = *it;
+            int depth = static_cast<int>(it.depth());
+            if (depth > max_depth) {
+                if (entry.is_directory()) it.disable_recursion_pending();
+                continue;
+            }
 
             std::string name = entry.path().filename().string();
             if (entry.is_directory() && should_exclude(name, exclude_patterns)) {
+                it.disable_recursion_pending();
                 continue;
             }
 
